@@ -25,12 +25,10 @@ public class KerasNNRunner
 	{
 		return SavedModelBundle.load(dir, "serve");
 	}
-	
-	@SuppressWarnings("rawtypes")
 	public float predict (SavedModelBundle model, List<Double> inputs, String scalerFile)
-	{	
+	{
 		long startDate = System.currentTimeMillis();
-		Tensor x = NNUtils.toTensor(inputs);
+		Tensor x = MLUtils.toTensor(inputs);
 
 		// running prediction
 		TFloat32 outputTensor = (TFloat32)model.session().runner().feed("serving_default_input_1:0", x).fetch("StatefulPartitionedCall:0").run().get(0);

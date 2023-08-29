@@ -10,8 +10,6 @@ import org.tensorflow.SavedModelBundle;
 import org.tensorflow.ndarray.StdArrays;
 import org.tensorflow.types.TFloat32;
 
-import static org.nd4j.linalg.api.shape.Shape.shape;
-
 public class KerasModel
 {
 	// the name of the input variable in the PB bundle
@@ -22,7 +20,7 @@ public class KerasModel
 	private SavedModelBundle bundle;
 	private MinMaxScaler scaler;
 	private boolean isVerbose;
-	private String prefix;
+	private String logPrefix;
 	private List<String> featureNames;
 	
 	public KerasModel (String modelDir, String scalerPath, List<String> featureNames) throws MLException
@@ -31,7 +29,7 @@ public class KerasModel
 		this.featureNames = featureNames;
 		this.outputName = "StatefulPartitionedCall:0";
 		this.isVerbose = false;
-		this.prefix = "[MR]";
+		this.logPrefix = "[MR]";
 		this.load(modelDir);
 		
 		if (!StringUtils.isEmpty(scalerPath))
@@ -75,31 +73,21 @@ public class KerasModel
 	
 	public float predict (List<Double> features, boolean isScale)
 	{
-		log("Predicting features: " + listToString(features));
+		log("Predicting features: " + MLUtils.listToString(features));
 		
 		if (isScale)
 		{
 			log("Scaling features");
 			features = this.scaler.transform(features);
-			log("Scaled features: " + listToString(features));
+			log("Scaled features: " + MLUtils.listToString(features));
 		}
 
-		//Tensor x = Tensor.of(TFloat32.class, org.tensorflow.ndarray.Shape.of(1, features.size()));
-		// FloatNdArray inputArr = NdArrays.ofFloats(org.tensorflow.ndarray.Shape.of(1, features.size()));
-		TFloat32 x = NNUtils.toTensor2D(features);
+		TFloat32 x = MLUtils.toTensor2D(features);
 
-
-		/*Tensor<Float> x = Tensor.create(
-	            new long[] {1, features.size()},
-	            FloatBuffer.wrap(toArray(features))
-        );*/
-
-		System.out.println("Input shape: " + x.shape());
-
+		log("Input shape: " + x.shape());
 		log("Running prediction");
 		TFloat32 outputTensor = (TFloat32)this.bundle.session().runner().feed(this.inputName, x).fetch(this.outputName).run().get(0);
 		float[][] output = StdArrays.array2dCopyOf(outputTensor);
-		//float[][] output = this.bundle.session().runner().feed(this.inputName, x).fetch(this.outputName).run().get(0).copyTo(new float[1][1]);
 		log("Prediction: " + output[0][0]);
 		return output[0][0];
 	}
@@ -226,16 +214,6 @@ public class KerasModel
 		return inputName;
 	}
 	
-	private static String listToString (List<Double> list)
-	{
-		List<String> newList = new ArrayList<String>();
-		for (Double d : list)
-		{
-			newList.add(d != null ? d.toString() : "null");
-		}
-		return MiscUtils.implode(newList, ", ");
-	}
-	
 	public void setInputName(String inputName)
 	{
 		this.inputName = inputName;
@@ -253,8 +231,9 @@ public class KerasModel
 	
 	private void log (String msg)
 	{
-		if (this.isVerbose) {
-			System.out.println(prefix + " " + msg);
+		if (this.isVerbose)
+		{
+			System.out.println(this.logPrefix + " " + msg);
 		}
 	}
 }

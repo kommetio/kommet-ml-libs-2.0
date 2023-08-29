@@ -7,9 +7,10 @@ import org.tensorflow.ndarray.buffer.DataBuffers;
 import org.tensorflow.ndarray.buffer.FloatDataBuffer;
 import org.tensorflow.types.TFloat32;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class NNUtils
+public class MLUtils
 {
     /**
      * This method is to show how to convert the INDArray to a float array. This
@@ -52,6 +53,16 @@ public class NNUtils
             array[i] = list.get(i).floatValue();
         }
         return array;
+    }
+
+    public static String listToString (List<Double> list)
+    {
+        List<String> newList = new ArrayList<String>();
+        for (Double d : list)
+        {
+            newList.add(d != null ? d.toString() : "null");
+        }
+        return MiscUtils.implode(newList, ", ");
     }
 
     public static String getLibPath() {

@@ -88,7 +88,7 @@ public class NetworkRunner
         INDArray predicted = this.network.output(features);
 		
 		// get probabilities for the last prediction in the file, because this prediction contains result for our input
-		return NNUtils.getFloatArrayFromSlice(predicted);
+		return MLUtils.getFloatArrayFromSlice(predicted);
 	}
 
 	private static DataSetIterator getDataSetIterator(List<Double> input, int labelIndex, int classCount)
