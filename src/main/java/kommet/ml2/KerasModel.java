@@ -44,6 +44,13 @@ public class KerasModel
 		return this.predict(features, true);
 	}
 	
+	/**
+	 * Runs the model and returns the prediction
+	 * @param featureMap A string of format "<feature-name>:<feature-double-value>,..."
+	 * @param isScale
+	 * @return the value of the prediction returned by the model
+	 * @throws MLException
+	 */
 	public float predict (String featureMap, boolean isScale) throws MLException
 	{
 		List<String> mapItems = MiscUtils.splitAndTrim(featureMap, ",");
@@ -71,6 +78,12 @@ public class KerasModel
 		return this.predict(features, isScale);
 	}
 	
+	/**
+	 * Runs a predictions
+	 * @param features List of features in order specified when the KerasModel object was created
+	 * @param isScale Whether min-max scaling should be applied to features
+	 * @return The value of the prediction
+	 */
 	public float predict (List<Double> features, boolean isScale)
 	{
 		log("Predicting features: " + MLUtils.listToString(features));
@@ -78,11 +91,33 @@ public class KerasModel
 		if (isScale)
 		{
 			log("Scaling features");
-			features = this.scaler.transform(features);
+			features = this.scaler.transform1d(features);
 			log("Scaled features: " + MLUtils.listToString(features));
 		}
 
+		// convert the feature values to a 2D tensor with shape [1, num-of-features]
 		TFloat32 x = MLUtils.toTensor2D(features);
+
+		log("Input shape: " + x.shape());
+		log("Running prediction");
+		TFloat32 outputTensor = (TFloat32)this.bundle.session().runner().feed(this.inputName, x).fetch(this.outputName).run().get(0);
+		float[][] output = StdArrays.array2dCopyOf(outputTensor);
+		log("Prediction: " + output[0][0]);
+		return output[0][0];
+	}
+	
+	/**
+	 * Predicts based on a 2D input. The input contains N observations, and each observation consists of M features.
+	 */
+	public float predict2d (List<List<Double>> observations, boolean isScale)
+	{
+		if (isScale)
+		{
+			observations = this.scaler.transform2d(observations);
+		}
+
+		// convert the feature values to a 2D tensor with shape [1, num-of-features]
+		TFloat32 x = MLUtils.toTensor3D(observations);
 
 		log("Input shape: " + x.shape());
 		log("Running prediction");
@@ -134,6 +169,11 @@ public class KerasModel
 	public void setVerbose (boolean verbose)
 	{
 		this.isVerbose = verbose;
+	}
+
+	public void setLogPrefix (String p)
+	{
+		this.logPrefix = p;
 	}
 	
 	/*private static INDArray toINDArray (List<Double> inputs)

@@ -32,26 +32,63 @@ public class MLUtils
 
     public static TFloat32 toTensor (List<Double> input)
     {
-        FloatNdArray inputArr = NdArrays.vectorOf(toArray(input));
+        FloatNdArray inputArr = NdArrays.vectorOf(toArray1D(input));
         return TFloat32.tensorOf(inputArr);
     }
 
+    /**
+     * Converts the list of double values to a 2D tensor with shape [1, num-of-values]
+     * @param input
+     * @return
+     */
     public static TFloat32 toTensor2D (List<Double> input)
     {
-        float[][] inputs2d = new float[1][];
-        inputs2d[0] = toArray(input);
-        FloatDataBuffer buf = DataBuffers.of(toArray(input));
+        FloatDataBuffer buf = DataBuffers.of(toArray1D(input));
         FloatNdArray inputArr = NdArrays.wrap(org.tensorflow.ndarray.Shape.of(1, input.size()), buf);
         return TFloat32.tensorOf(inputArr);
     }
 
-    private static float[] toArray(List<Double> list)
+    public static TFloat32 toTensor3D (List<List<Double>> input)
+    {
+        List<Double> listOneDim = new ArrayList<Double>();
+        int dim1Size = input.size();
+        int dim2Size = input.get(0).size();
+
+        for (List<Double> observation : input)
+        {
+            listOneDim.addAll(observation);
+        }
+
+        FloatDataBuffer buf = DataBuffers.of(toArray1D(listOneDim));
+        FloatNdArray inputArr = NdArrays.wrap(org.tensorflow.ndarray.Shape.of(1, dim1Size, dim2Size), buf);
+        return TFloat32.tensorOf(inputArr);
+    }
+
+    private static float[] toArray1D(List<Double> list)
     {
         float[] array = new float[list.size()];
         for(int i = 0; i < list.size(); i++)
         {
             array[i] = list.get(i).floatValue();
         }
+        return array;
+    }
+
+    private static float[][] toArray2D(List<List<Double>> list)
+    {
+        float[][] array = new float[list.size()][];
+
+        int observationId = 0;
+        for (List<Double> observation : list)
+        {
+            float[] obsArr = new float[observation.size()];
+            for (int i = 0; i < observation.size(); i++)
+            {
+                obsArr[i] = observation.get(i).floatValue();
+            }
+            array[observationId++] = obsArr;
+        }
+
         return array;
     }
 

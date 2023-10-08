@@ -102,7 +102,7 @@ public class MinMaxScaler
 		return scaler;
 	}
 	
-	public List<Double> transform (List<Double> features)
+	public List<Double> transform1d (List<Double> features)
 	{
 		List<Double> scaledFeatures = new ArrayList<Double>();
 		
@@ -115,6 +115,31 @@ public class MinMaxScaler
 			i++;
 		}
 		
+		return scaledFeatures;
+	}
+
+	public List<List<Double>> transform2d (List<List<Double>> observations)
+	{
+		List<List<Double>> scaledFeatures = new ArrayList<List<Double>>();
+
+		for (int k = 0; k < observations.size(); k++)
+		{
+			List<Double> singleObservation = observations.get(k);
+			List<Double> scaledObservation = new ArrayList<Double>();
+
+			int featureIndex = 0;
+			// iterate over features within this observation
+			for (Double f : singleObservation)
+			{
+				f *= this.scaleValues.get(featureIndex);
+				f += this.minValues.get(featureIndex);
+				scaledObservation.add(f);
+				featureIndex++;
+			}
+
+			scaledFeatures.add(scaledObservation);
+		}
+
 		return scaledFeatures;
 	}
 
