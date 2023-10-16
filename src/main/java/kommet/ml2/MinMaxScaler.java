@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class MinMaxScaler
+public class MinMaxScaler extends Scaler
 {
 	private int rangeMin;
 	private int rangeMax;
@@ -36,7 +36,26 @@ public class MinMaxScaler
 		{
 			br = new BufferedReader(new FileReader(statsFile));
 			
-			String minLine = br.readLine();
+			String minLine = null;
+
+			// in newer version of the protocol, the first line will have the format
+			// "scaler_type:min-max" or "scaler_type:robust"
+			String scalerTypeList = br.readLine();
+			if (scalerTypeList.startsWith("scaler_type:"))
+			{
+				List<String> scalerTypeParams = MiscUtils.splitAndTrim(scalerTypeList, ":");
+				String scalerType = scalerTypeParams.get(1);
+				if (!"min-max".equals(scalerType))
+				{
+					throw new MLException("Incorrect scaler type '" + scalerType + "'. Expected 'min-max'");
+				}
+
+				minLine = br.readLine();
+			}
+			else
+			{
+				minLine = scalerTypeList;
+			}
 			
 			if (StringUtils.isEmpty(minLine))
 			{

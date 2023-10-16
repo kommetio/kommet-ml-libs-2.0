@@ -3,6 +3,7 @@ package examples;
 import kommet.ml2.KerasModel;
 import kommet.ml2.MLException;
 import kommet.ml2.MiscUtils;
+import kommet.ml2.ScalerType;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -15,16 +16,15 @@ import java.util.Map;
 
 public class ModelLoadingAndPrediction {
 
-    public static void runCnnPrediction() throws MLException, IOException
+    public static float run2DPrediction(int observationCount, int featureCount, String inputFilePath, String modelPath) throws MLException, IOException
     {
-        // create random input
-        int observationCount = 500;
-        int featureCount = 115;
+        String rawInput = Files.readString(Paths.get(inputFilePath), Charset.forName("UTF8"));
 
-        String rawInput = Files.readString(Paths.get("input1d-2.txt"), Charset.forName("UTF8"));
-
+        // read all features * observations from a single line
+        // the length of the line is num_features * num_observations
         List<String> rawInputItems = MiscUtils.splitAndTrim(rawInput, ",");
-        int rawInputId = 0;
+
+        // convert 1D input to 2D list of lists (num_observations * num_features)
         List<List<Double>> observations = new ArrayList<List<Double>>();
         for (int i = 0; i < observationCount; i++)
         {
@@ -37,10 +37,11 @@ public class ModelLoadingAndPrediction {
             observations.add(observation);
         }
 
-        KerasModel model = new KerasModel("D:\\ml\\kmt-ml-libs-2.0\\model-cnn", null, null);
+        KerasModel model = new KerasModel(modelPath, "D:\\ml\\kmt-ml-libs-2.0\\model-tmp-scaler-stats-robust.dat", ScalerType.ROBUST, null);
         model.setVerbose(true);
-        float prediction = model.predict2d(observations, false);
-        System.out.println("Prediction: " + prediction);
+
+        // return the prediction of the model
+        return model.predict2d(observations, false);
     }
 
     public static void runPrediction() throws MLException
@@ -68,7 +69,7 @@ public class ModelLoadingAndPrediction {
         try
         {
             // load model from disk
-            KerasModel model = new KerasModel("D:\\ml\\kmt-ml-libs-2.0\\model-evening", "D:\\ml\\kmt-ml-libs-2.0\\model-evening\\stats.dat", features);
+            KerasModel model = new KerasModel("D:\\ml\\kmt-ml-libs-2.0\\model-evening", "D:\\ml\\kmt-ml-libs-2.0\\model-evening\\stats.dat", ScalerType.MINMAX, features);
             model.setVerbose(true);
 
             // convert string inputs to double

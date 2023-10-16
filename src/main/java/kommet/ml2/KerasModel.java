@@ -18,12 +18,12 @@ public class KerasModel
 	// the name of the output variable in the PB bundle
 	private String outputName;
 	private SavedModelBundle bundle;
-	private MinMaxScaler scaler;
+	private Scaler scaler;
 	private boolean isVerbose;
 	private String logPrefix;
 	private List<String> featureNames;
 	
-	public KerasModel (String modelDir, String scalerPath, List<String> featureNames) throws MLException
+	public KerasModel (String modelDir, String scalerPath, ScalerType scalerType, List<String> featureNames) throws MLException
 	{
 		this.inputName = "serving_default_input_1:0";
 		this.featureNames = featureNames;
@@ -34,8 +34,13 @@ public class KerasModel
 		
 		if (!StringUtils.isEmpty(scalerPath))
 		{
-			this.scaler = MinMaxScaler.load(scalerPath, 0, 1);
+			switch (scalerType)
+			{
+				case MINMAX: this.scaler = MinMaxScaler.load(scalerPath, 0, 1); break;
 			//this.loadMinMaxScaler(scalerPath, this.scalerMin, this.scalerMax);
+				case ROBUST: this.scaler = RobustScaler.load(scalerPath); break;
+				default: throw new MLException("Unsupported scaler type " + scalerType);
+			}
 		}
 	}
 	
@@ -126,45 +131,6 @@ public class KerasModel
 		log("Prediction: " + output[0][0]);
 		return output[0][0];
 	}
-	
-	/*private List<Double> scale (List<Double> inputs)
-	{	
-		INDArray features = Nd4j.zeros(inputs.size());
-		
-		int i = 0;
-		for (Double input : inputs)
-		{
-			features.putScalar(new int[] {i}, input);
-			i++;
-		}
-		
-		((NormalizerMinMaxScaler)scaler).transform(features);
-		double[] scaledInput = features.toDoubleVector();
-		
-		List<Double> inputList = new ArrayList<Double>();
-		for (int k = 0; k < scaledInput.length; k++)
-		{
-			double input = scaledInput[k];
-			
-			if (this.featuresWithZeroScalingRange.contains(k))
-			{
-				// for some reason the scaler works incorrectly if min and max are the same
-				// i.e. if the fit data set produced max = min = 0.0, and the actual value before scaling was e.g. -1.0, it will be scaled to -10000.0
-				// so we need to handle this manually
-				if (input < this.scalerMin)
-				{
-					input = -1.0; // sic - outside of range
-				}
-				else if (input > this.scalerMax)
-				{
-					input = 1.0;
-				}
-			}
-			
-			inputList.add(input);
-		}
-		return inputList;
-	}*/
 
 	public void setVerbose (boolean verbose)
 	{
