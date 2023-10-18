@@ -118,7 +118,16 @@ public class KerasModel
 	{
 		if (isScale)
 		{
+			log("Scaling data");
 			observations = this.scaler.transform2d(observations);
+
+			/*for (List<Double> obs : observations)
+			{
+				for (Double val : obs)
+				{
+					System.out.print(val + ",");
+				}
+			}*/
 		}
 
 		// convert the feature values to a 2D tensor with shape [1, num-of-features]

@@ -40,21 +40,23 @@ public class MinMaxScaler extends Scaler
 
 			// in newer version of the protocol, the first line will have the format
 			// "scaler_type:min-max" or "scaler_type:robust"
-			String scalerTypeList = br.readLine();
-			if (scalerTypeList.startsWith("scaler_type:"))
+			String firstLine = br.readLine();
+			if (firstLine.startsWith("scaler_type:"))
 			{
-				List<String> scalerTypeParams = MiscUtils.splitAndTrim(scalerTypeList, ":");
+				List<String> scalerTypeParams = MiscUtils.splitAndTrim(firstLine, ":");
 				String scalerType = scalerTypeParams.get(1);
 				if (!"min-max".equals(scalerType))
 				{
 					throw new MLException("Incorrect scaler type '" + scalerType + "'. Expected 'min-max'");
 				}
 
+				// the min-max line will be the second one (after the one containing scaler type)
 				minLine = br.readLine();
 			}
 			else
 			{
-				minLine = scalerTypeList;
+				// the first line contains minimum values for scaling
+				minLine = firstLine;
 			}
 			
 			if (StringUtils.isEmpty(minLine))

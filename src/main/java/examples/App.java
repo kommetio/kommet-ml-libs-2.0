@@ -9,7 +9,7 @@ public class App {
     public static void main(String[] args) throws MLException, IOException
     {
         //ModelLoadingAndPrediction.runPrediction();
-        float pred = ModelLoadingAndPrediction.run2DPrediction(499, 11, "sample-input-1d.csv", "D:\\ml\\kmt-ml-libs-2.0\\model-tmp");
+        float pred = ModelLoadingAndPrediction.run2DPrediction(499, 11, "sample-input-1d.csv", "D:\\ml\\kmt-ml-libs-2.0\\model-baseline");
         System.out.println("Prediction: " + pred);
     }
 

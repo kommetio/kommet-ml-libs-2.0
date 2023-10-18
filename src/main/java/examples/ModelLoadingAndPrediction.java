@@ -37,11 +37,11 @@ public class ModelLoadingAndPrediction {
             observations.add(observation);
         }
 
-        KerasModel model = new KerasModel(modelPath, "D:\\ml\\kmt-ml-libs-2.0\\model-tmp-scaler-stats-robust.dat", ScalerType.ROBUST, null);
+        KerasModel model = new KerasModel(modelPath, "D:\\ml\\kmt-ml-libs-2.0\\model-baseline-scaler-stats-robust.dat", ScalerType.ROBUST, null);
         model.setVerbose(true);
 
         // return the prediction of the model
-        return model.predict2d(observations, false);
+        return model.predict2d(observations, true);
     }
 
     public static void runPrediction() throws MLException

@@ -122,7 +122,7 @@ public class RobustScaler extends Scaler
         int i = 0;
         for (Double f : features)
         {
-            f *= (f - this.centerValues.get(i)) / this.scaleValues.get(i);
+            f = (f - this.centerValues.get(i)) / this.scaleValues.get(i);
             scaledFeatures.add(f);
             i++;
         }
@@ -143,7 +143,7 @@ public class RobustScaler extends Scaler
             // iterate over features within this observation
             for (Double f : singleObservation)
             {
-                f *= (f - this.centerValues.get(featureIndex)) / this.scaleValues.get(featureIndex);
+                f = (f - this.centerValues.get(featureIndex)) / this.scaleValues.get(featureIndex);
                 scaledObservation.add(f);
                 featureIndex++;
             }
